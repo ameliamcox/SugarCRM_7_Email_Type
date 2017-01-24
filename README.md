@@ -15,8 +15,9 @@ I have modified the email field in the Contact Module:
 I have copied from original and customized the record view render function to:
 	<BR>- pull this.model.attributes.business_email_c, this.model.attributes.personal_email_c, this.model.attributes.school_email_c
 	<BR>- for each email array in this.model.attributes.email
-		<BR>------------ creates and sets email.has_email_types to TRUE
-		<BR>------------ creates and sets email.school_email based on whether email.email_address === school_email (value of business_email_c text field)
-		<BR>------------ creates and sets email.business_email based on whether email.email_address === business_email (value of personal_email_c text field)
-		<BR>------------ creates and sets email.personal_email based on whether email.email_address === personal_email (value of school_email_c text field)
-
+	<UL>
+		<LI> creates and sets email.has_email_types to TRUE</LI>
+		<LI> creates and sets email.school_email based on whether email.email_address === school_email (value of business_email_c text field)</LI>
+		<LI> creates and sets email.business_email based on whether email.email_address === business_email (value of personal_email_c text field)</LI>
+		<LI>------------ creates and sets email.personal_email based on whether email.email_address === personal_email (value of school_email_c text field)</LI>
+	</UL>
