@@ -80,6 +80,8 @@
         this.ellipsis = _.isUndefined(this.def.ellipsis) || this.def.ellipsis;
     },
 
+
+
     /**
      * When data changes, re-render the field only if it is not on edit (see MAR-1617).
      * @inheritdoc
@@ -99,10 +101,11 @@
      */
     _render: function() {
 
-
         var emailsHtml = '';
 
         this._super("_render");
+
+        this._getEmailTypes();
 
         if (this.tplName === 'edit') {
             // Add email input fields for edit
@@ -111,6 +114,36 @@
             }, this);
             this.$el.prepend(emailsHtml);
         }
+    },
+
+    _getEmailTypes: function(){
+if(this.name != 'email') debugger;
+        // Get Business Email Address from field on form
+        var business_email_c = this.model.get('business_email_c');
+        // Get School Email Address from field on form
+        var school_email_c = this.model.get('school_email_c');
+        // Get Personal Email Address from field on form
+        var personal_email_c = this.model.get('personal_email_c');
+
+        // Add Email Type labels
+        var existingAddresses = app.utils.deepCopy(this.model.get(this.name));
+
+        _.each(existingAddresses, function(email, i) {
+            // Check to See if business address exists
+            existingAddresses[i]['business_email'] = (email['email_address'] === business_email_c);
+            // (email['email_address'] === business_email_c) ? existingAddresses[i]['business_email'] = true : false;
+
+            // Check to See if school address exists
+            // (email['email_address'] === school_email_c) ? existingAddresses[i]['school_email'] = true : false;
+            existingAddresses[i]['personal_email'] = (email['email_address'] === personal_email_c);
+
+            // Check to See if personal address exists
+            // (email['email_address'] === personal_email_c) ? existingAddresses[i]['personal_email'] = true : false;
+            existingAddresses[i]['school_email'] = (email['email_address'] === school_email_c);
+
+        });
+        // TODO Need a check here to see if an email is listed as an email type in a field, but is not in email list.
+        this.model.set('email', existingAddresses);
     },
 
     /**
@@ -122,7 +155,7 @@
     _buildEmailFieldHtml: function(email) {
 //edit-email-field-types
 
-        var editEmailFieldTemplate = app.template.getField('email', 'edit-email-field'),
+        var editEmailFieldTemplate = app.template.getField('email', 'edit-field-email-type', 'Contacts'),
             emails = this.model.get(this.name),
             index = _.indexOf(emails, email);
 
@@ -288,7 +321,7 @@
             $properties = this.$('[data-emailproperty='+property+']'),
             index = $properties.index($property);
 
-        if (property === 'primary_address') {
+        if (property === 'primary_address' || property === 'business_email' || property === 'personal_email') {
             $properties.removeClass('active');
         }
 
@@ -352,7 +385,6 @@
 
         //If property is primary_address, we want to make sure one and only one primary email is set
         //As a consequence we reset all the primary_address properties to 0 then we toggle property for this index.
-//        if (property === 'primary_address') {
         if (property === 'primary_address') {
             existingAddresses[index][property] = false;
             _.each(existingAddresses, function(email, i) {
@@ -369,9 +401,31 @@
             existingAddresses[index][property] = true;
         }
 
-        this.model.set(this.name, existingAddresses);
-    },
+        if(property === 'business_email' || property === 'personal_email') this._setEmailTypes(index, property, existingAddresses);
 
+        this.model.set(this.name);
+    },
+    _setEmailTypes: function(index, property, existingAddresses)
+    {
+        if(this.name != 'email') debugger;
+
+        //If property is we want to make sure one and only one business personal email is set
+        //As a consequence we reset all the business_email and person_email properties to 0 then we toggle property for
+        // this index.
+            existingAddresses[index][property] = false;
+            _.each(existingAddresses, function(email, i) {
+                if (email[property]) {
+                    existingAddresses[i][property] = false;
+                }
+            });
+
+            // Get Email Address being changed
+            email_address = existingAddresses[index]['email_address'];
+
+            // Create name of field that appears on form
+            email_field_name = property + '_c';
+            this.model.set(email_field_name, email_address);
+    },
     /**
      * Remove email address from the model.
      * @param {Number} index
