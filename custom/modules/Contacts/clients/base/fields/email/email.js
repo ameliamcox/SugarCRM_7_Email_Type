@@ -25,9 +25,9 @@
         primary_address: {lbl: "LBL_EMAIL_PRIMARY", cl: "primary"},
         opt_out: {lbl: "LBL_EMAIL_OPT_OUT", cl: "opted-out"},
         invalid_email: {lbl: "LBL_EMAIL_INVALID", cl: "invalid"},
-	personal_email: {lbl: "LBL_PERSONAL_EMAIL", cl: "personal"},
-	school_email: {lbl: "LBL_SCHOOL_EMAIL", cl: "school"},
-	business_email: {lbl: "LBL_BUSINESS_EMAIL", cl: "business"},
+        personal_email: {lbl: "LBL_PERSONAL_EMAIL_C", cl: "personal"},
+        school_email: {lbl: "LBL_SCHOOL_EMAIL_C", cl: "school"},
+        business_email: {lbl: "LBL_BUSINESS_EMAIL_C", cl: "business"},
     },
     plugins: ['Tooltip', 'ListEditable', 'EmailClientLaunch'],
 
@@ -65,6 +65,10 @@
 
         this._super('initialize', [options]);
 
+
+
+        this._add_Missing_emails();
+        this._getEmailTypes();
         //set model as the related record when composing an email (copy is made by plugin)
         this.addEmailOptions({related: this.model});
 
@@ -79,8 +83,19 @@
          */
         this.ellipsis = _.isUndefined(this.def.ellipsis) || this.def.ellipsis;
     },
+    /**
+     * This adds the personal, business or school email to the list if it doesn't exist.
+     * @private
+     */
+     _add_Missing_emails: function()
+    {
+        var existingAddresses = app.utils.deepCopy(this.model.get(this.name));
 
+        this._addNewAddressToModel(this.model.get('business_email_c'));
+        this._addNewAddressToModel(this.model.get('personal_email_c'));
+        this._addNewAddressToModel(this.model.get('school_email_c'));
 
+    },
 
     /**
      * When data changes, re-render the field only if it is not on edit (see MAR-1617).
@@ -117,7 +132,7 @@
     },
 
     _getEmailTypes: function(){
-if(this.name != 'email') debugger;
+
         // Get Business Email Address from field on form
         var business_email_c = this.model.get('business_email_c');
         // Get School Email Address from field on form
@@ -131,18 +146,17 @@ if(this.name != 'email') debugger;
         _.each(existingAddresses, function(email, i) {
             // Check to See if business address exists
             existingAddresses[i]['business_email'] = (email['email_address'] === business_email_c);
-            // (email['email_address'] === business_email_c) ? existingAddresses[i]['business_email'] = true : false;
 
             // Check to See if school address exists
-            // (email['email_address'] === school_email_c) ? existingAddresses[i]['school_email'] = true : false;
             existingAddresses[i]['personal_email'] = (email['email_address'] === personal_email_c);
 
             // Check to See if personal address exists
-            // (email['email_address'] === personal_email_c) ? existingAddresses[i]['personal_email'] = true : false;
             existingAddresses[i]['school_email'] = (email['email_address'] === school_email_c);
-
         });
-        // TODO Need a check here to see if an email is listed as an email type in a field, but is not in email list.
+        
+
+
+
         this.model.set('email', existingAddresses);
     },
 
@@ -340,6 +354,7 @@ if(this.name != 'email') debugger;
      * @private
      */
     _addNewAddressToModel: function(email) {
+
         var existingAddresses = this.model.get(this.name) ? app.utils.deepCopy(this.model.get(this.name)) : [],
             dupeAddress = _.find(existingAddresses, function(address){
                 return (address.email_address === email);
