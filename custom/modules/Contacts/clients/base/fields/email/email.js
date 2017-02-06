@@ -91,9 +91,9 @@
     {
         var existingAddresses = app.utils.deepCopy(this.model.get(this.name));
 
-        this._addNewAddressToModel(this.model.get('business_email_c'));
-        this._addNewAddressToModel(this.model.get('personal_email_c'));
-        this._addNewAddressToModel(this.model.get('school_email_c'));
+        if(this.model.get('business_email_c') != '') this._addNewAddressToModel(this.model.get('business_email_c'));
+        if(this.model.get('personal_email_c') != '') this._addNewAddressToModel(this.model.get('personal_email_c'));
+        if(this.model.get('school_email_c') != '') this._addNewAddressToModel(this.model.get('school_email_c'));
 
     },
 
@@ -153,7 +153,7 @@
             // Check to See if personal address exists
             existingAddresses[i]['school_email'] = (email['email_address'] === school_email_c);
         });
-        
+        // TODO Need a check here to see if an email is listed as an email type in a field, but is not in email list.
 
 
 
@@ -174,7 +174,8 @@
             index = _.indexOf(emails, email);
 
         return editEmailFieldTemplate({
-            max_length: this.def.len,
+            max_length: this.def.len - 10,
+            // max_length: this.def.len,
             index: index === -1 ? emails.length-1 : index,
             email_address: email.email_address,
             primary_address: email.primary_address,
